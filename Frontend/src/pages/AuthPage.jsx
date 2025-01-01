@@ -2,65 +2,36 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Login from '../components/auth/Login';
 import Register from '../components/auth/Register';
-import ResetPassword from '../components/auth/ResetPassword';
+import ResetPassword from '../components/auth/Reset';
 
 const AuthPage = () => {
-  const [currentView, setCurrentView] = useState('login'); // Tracks current view (login, register, reset-password)
-  const [errorMessage, setErrorMessage] = useState(null); // For displaying error messages
+  const [currentView, setCurrentView] = useState('login');
+  const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
 
-  // Switch between login, register, and reset password views
   const switchView = (view) => {
     setCurrentView(view);
-    setErrorMessage(null); // Clear error message when switching views
+    setErrorMessage(null);
   };
 
-  // Handle login form submission
-  const handleLogin = async (data) => {
+  const handleSubmit = async (data, type) => {
+    const url = `http://localhost:5000/api/auth/${type}`;
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       const result = await response.json();
 
       if (response.ok) {
-        // On success, navigate to the dashboard
-        navigate('/dashboard-select');
+        if (type === 'login') navigate('/dashboard-select');
+        else setCurrentView('login');
       } else {
-        // On error, display the error message
-        setErrorMessage(result.message || 'Something went wrong!');
+        setErrorMessage(result.message || 'Operation failed!');
       }
     } catch (error) {
-      console.error('Login error:', error);
-      setErrorMessage('Network error, please try again.');
-    }
-  };
-
-  // Handle registration form submission
-  const handleRegister = async (data) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      const result = await response.json();
-
-      if (response.ok) {
-        // Redirect to login page after successful registration
-        setCurrentView('login');
-      } else {
-        // Display error if registration failed
-        setErrorMessage(result.message || 'Registration failed!');
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
+      console.error(`${type} error:`, error);
       setErrorMessage('Network error, please try again.');
     }
   };
@@ -72,29 +43,28 @@ const AuthPage = () => {
         <div className="w-full max-w-md">
           {/* Logo */}
           <div className="mb-12">
-            <div className="flex items-center gap-2" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={() => navigate('/')}
+            >
               <span className="text-[#33bbcf] text-3xl">|.|</span>
-              <span className="text-white text-xl font-semibold">InventoryTracker</span>
+              <span className="text-white text-xl font-semibold">
+                InventoryTracker
+              </span>
             </div>
           </div>
 
           {/* Form Rendering */}
           {currentView === 'login' && (
-            <Login onSwitchView={switchView} onSubmit={handleLogin} />
+            <Login onSwitchView={switchView} onSubmit={(data) => handleSubmit(data, 'login')} />
           )}
           {currentView === 'register' && (
-            <Register onSwitchView={switchView} onSubmit={handleRegister} />
+            <Register onSwitchView={switchView} onSubmit={(data) => handleSubmit(data, 'register')} />
           )}
-          {currentView === 'reset-password' && (
-            <ResetPassword onSwitchView={switchView} />
-          )}
+          {currentView === 'reset-password' && <ResetPassword onSwitchView={switchView} />}
 
           {/* Error Message */}
-          {errorMessage && (
-            <div className="text-red-500 mt-4">
-              <p>{errorMessage}</p>
-            </div>
-          )}
+          {errorMessage && <div className="text-red-500 mt-4">{errorMessage}</div>}
         </div>
       </div>
 

@@ -46,6 +46,24 @@ const Login = ({ onSwitchView, onSubmit }) => {
           )}
         </div>
 
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              {...register('remember')}
+              className="h-4 w-4 rounded border-gray-300 text-[#33bbcf] focus:ring-[#33bbcf]"
+            />
+            <label className="ml-2 text-sm text-gray-400">Remember me</label>
+          </div>
+          <button
+            type="button"
+            onClick={() => onSwitchView('reset-password')}
+            className="text-[#33bbcf] text-sm hover:underline"
+          >
+            Forgot password?
+          </button>
+        </div>
+
         <button
           type="submit"
           className="w-full bg-[#33bbcf] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#2ba9bd] transition-colors"
@@ -63,19 +81,9 @@ const Login = ({ onSwitchView, onSubmit }) => {
           Sign up
         </button>
       </p>
-
-      {/* Forgot Password Link */}
-      <p className="text-gray-400 text-center mt-4">
-        Forgot your password?{' '}
-        <button
-          onClick={() => onSwitchView('resetPassword')}
-          className="text-[#33bbcf] hover:underline"
-        >
-          Reset it
-        </button>
-      </p>
     </div>
   );
 };
+
 
 export default Login;

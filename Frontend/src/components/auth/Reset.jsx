@@ -1,85 +1,54 @@
-import { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
-const ResetPassword = () => {
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const navigate = useNavigate();
+const ResetPassword = ({ onSwitchView }) => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
 
-  const handleResetSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setMessage('');
-
-    // Validate email format
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setMessage('Please enter a valid email address.');
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      // Send the reset password request to the backend
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/auth/reset-password`, // Ensure API URL is set in .env
-        { email }
-      );
-
-      if (response.data.message) {
-        setMessage('If an account with that email exists, a reset link has been sent.');
-      }
-    } catch (error) {
-      setMessage('An error occurred while sending the reset request.');
-    } finally {
-      setIsLoading(false);
-    }
+  const onSubmit = (data) => {
+    console.log(data);
+    // Handle password reset logic here
   };
 
   return (
-    <div className="max-w-lg mx-auto bg-[#1c2537] p-8 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold text-white mb-2">Reset Your Password</h2>
-      <p className="text-gray-400 mb-8">Enter your email to reset your password</p>
+    <div>
+      <h2 className="text-3xl font-bold text-white mb-2">Reset your password</h2>
+      <p className="text-gray-400 mb-8">
+        Enter your email and we'll send you instructions to reset your password
+      </p>
 
-      <form onSubmit={handleResetSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-gray-300 mb-2">
-            Email
-          </label>
+          <label className="block text-gray-300 mb-2">Email</label>
           <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            {...register('email', {
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Invalid email address'
+              }
+            })}
             className="w-full px-4 py-3 rounded-lg bg-[#1c2537] text-white border border-[#2c374b] focus:outline-none focus:border-[#33bbcf] placeholder-gray-500"
             placeholder="Enter your email"
-            required
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
         </div>
 
         <button
           type="submit"
-          disabled={isLoading} // Disable button while loading
-          className={`w-full font-semibold py-3 px-4 rounded-lg transition-colors ${
-            isLoading
-              ? 'bg-gray-500 cursor-not-allowed'
-              : 'bg-[#33bbcf] text-white hover:bg-[#2ba9bd]'
-          }`}
+          className="w-full bg-[#33bbcf] text-white font-semibold py-3 px-4 rounded-lg hover:bg-[#2ba9bd] transition-colors"
         >
-          {isLoading ? 'Sending...' : 'Send Reset Link'}
+          Send reset instructions
         </button>
       </form>
 
-      {message && <p className="text-center text-gray-400 mt-4">{message}</p>}
-
-      <p className="text-gray-400 text-center mt-4">
-        Remembered your password?{' '}
+      <p className="text-gray-400 text-center mt-8">
+        Remember your password?{' '}
         <button
-          onClick={() => navigate('/auth')} // Navigate to login page
+          onClick={() => onSwitchView('login')}
           className="text-[#33bbcf] hover:underline"
         >
-          Log in
+          Back to login
         </button>
       </p>
     </div>
